@@ -65,6 +65,26 @@
         "command": "extension.markdown-pdf.all",
         "title": "Markdown PDF: Export (all: pdf, html, png, jpeg)",
         "group": "markdown-pdf"
+      },
+      {
+        "command": "extension.markdown-pdf.batch-pdf",
+        "title": "Markdown PDF: Batch Export (pdf)"
+      },
+      {
+        "command": "extension.markdown-pdf.batch-html",
+        "title": "Markdown PDF: Batch Export (html)"
+      },
+      {
+        "command": "extension.markdown-pdf.batch-png",
+        "title": "Markdown PDF: Batch Export (png)"
+      },
+      {
+        "command": "extension.markdown-pdf.batch-jpeg",
+        "title": "Markdown PDF: Batch Export (jpeg)"
+      },
+      {
+        "command": "extension.markdown-pdf.batch-all",
+        "title": "Markdown PDF: Batch Export (all: pdf, html, png, jpeg)"
       }
     ],
     "menus": {

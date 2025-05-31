@@ -15,7 +15,22 @@ function activate(context) {
     vscode.commands.registerCommand('extension.markdown-pdf.html', async function () { await markdownPdf('html'); }),
     vscode.commands.registerCommand('extension.markdown-pdf.png', async function () { await markdownPdf('png'); }),
     vscode.commands.registerCommand('extension.markdown-pdf.jpeg', async function () { await markdownPdf('jpeg'); }),
-    vscode.commands.registerCommand('extension.markdown-pdf.all', async function () { await markdownPdf('all'); })
+    vscode.commands.registerCommand('extension.markdown-pdf.all', async function () { await markdownPdf('all'); }),
+    vscode.commands.registerCommand('extension.markdown-pdf.batch-pdf', async function () { 
+      await batchMarkdownPdf('pdf'); 
+    }),
+    vscode.commands.registerCommand('extension.markdown-pdf.batch-html', async function () { 
+      await batchMarkdownPdf('html'); 
+    }),
+    vscode.commands.registerCommand('extension.markdown-pdf.batch-png', async function () { 
+      await batchMarkdownPdf('png'); 
+    }),
+    vscode.commands.registerCommand('extension.markdown-pdf.batch-jpeg', async function () { 
+      await batchMarkdownPdf('jpeg'); 
+    }),
+    vscode.commands.registerCommand('extension.markdown-pdf.batch-all', async function () { 
+      await batchMarkdownPdf('all'); 
+    })
   ];
   commands.forEach(function (command) {
     context.subscriptions.push(command);
@@ -304,7 +319,7 @@ function Slug(string) {
       string.trim()
             .toLowerCase()
             .replace(/\s+/g, '-') // Replace whitespace with -
-            .replace(/[\]\[\!\'\#\$\%\&\(\)\*\+\,\.\/\:\;\<\=\>\?\@\\\^\_\{\|\}\~\`。，、；：？！…—·ˉ¨‘’“”々～‖∶＂＇｀｜〃〔〕〈〉《》「」『』．〖〗【】（）［］｛｝]/g, '') // Remove known punctuators
+            .replace(/[\]\[\!\'\#\$\%\&\(\)\*\+\,\.\/\:\;\<\=\>\?\@\\\^\_\{\|\}\~\`。，、；：？！…—·ˉ¨‘'""々～‖∶＂＇｀｜〃〔〕〈〉《》「」『』．〖〗【】（）［］｛｝]/g, '') // Remove known punctuators
             .replace(/^\-+/, '') // Remove leading -
             .replace(/\-+$/, '') // Remove trailing -
     );
@@ -897,5 +912,53 @@ function init() {
     }
   } catch (error) {
     showErrorMessage('init()', error);
+  }
+}
+
+// 批量处理函数
+async function batchMarkdownPdf(option_type) {
+  try {
+    // 让用户选择多个文件
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: true,
+      filters: {
+        'Markdown': ['md', 'markdown']
+      },
+      openLabel: 'Select Markdown files to convert'
+    });
+
+    if (!uris || uris.length === 0) {
+      return;
+    }
+
+    // 显示进度条
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: 'Converting Markdown files...',
+      cancellable: true
+    }, async (progress, token) => {
+      for (let i = 0; i < uris.length; i++) {
+        if (token.isCancellationRequested) {
+          break;
+        }
+
+        const uri = uris[i];
+        progress.report({
+          message: `Converting ${path.basename(uri.fsPath)} (${i + 1}/${uris.length})`,
+          increment: (100 / uris.length)
+        });
+
+        // 打开文件
+        const document = await vscode.workspace.openTextDocument(uri);
+        const editor = await vscode.window.showTextDocument(document);
+
+        // 使用现有的转换逻辑
+        await markdownPdf(option_type);
+      }
+    });
+
+    vscode.window.showInformationMessage(`Successfully converted ${uris.length} files`);
+  } catch (error) {
+    showErrorMessage('batchMarkdownPdf()', error);
   }
 }
